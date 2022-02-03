@@ -1,0 +1,19 @@
+{
+  "name": "spac",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "@types/three": "0.137.0",
+    "three": "0.137.0",
+    "webgl": "0.0.7"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.6.1"
+  },
+  "keywords": []
+}
