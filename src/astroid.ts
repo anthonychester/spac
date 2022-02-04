@@ -9,6 +9,15 @@ export class astroid {
     this.model = new THREE.Mesh(geome, mater);
     this.model.position.set(x, y, z);
     scene.add(this.model);
+    this.model.name = "astroid";
     this.model.data = { vaule: 5 };
+
+    var geo = new THREE.WireframeGeometry(new THREE.BoxGeometry(10, 10, 10)); // or WireframeGeometry( geometry )
+
+    var mat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+
+    this.model.wireframe = new THREE.LineSegments(geo, mat);
+    this.model.wireframe.visible = false;
+    this.model.add(this.model.wireframe);
   }
 }

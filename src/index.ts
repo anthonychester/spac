@@ -15,15 +15,18 @@ const camera = new THREE.PerspectiveCamera(
 
 let astroids: astroid[] = [];
 
+let target = null;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let mouseDown = false;
 astroids.push(new astroid(scene, 80, 0, 80));
 //create a blue LineBasicMaterial
 const materialL = new THREE.LineBasicMaterial({
-  color: 0x0000ff,
+  color: 0xdd0000,
   linewidth: 50,
-  linecap: "round"
+  linecap: "round",
+  transparent: true,
+  opacity: 0.5
 });
 
 window.addEventListener("mousedown", () => {
@@ -102,9 +105,9 @@ cameraFolder.open();
 */
 
 function animate() {
-  //cube.rotation.x += 0.01;
-  //cube.rotation.y += 0.01;
-  //cone.rotation.x += 0.01;
+  if (target) {
+    line.rotation.y += 0.1;
+  }
   player.update(null);
   renderLine();
   updateRaycast();
@@ -122,16 +125,19 @@ animate();
 */
 
 function renderLine() {
-  let pos = player.position;
-  scene.remove(line);
-  line = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(pos.x, pos.y - 2, pos.z),
-      new THREE.Vector3(0, 0, 0)
-    ]),
-    materialL
-  );
-  scene.add(line);
+  if (target) {
+    let pos = player.position;
+    let tpos = target.position;
+    scene.remove(line);
+    line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(pos.x, pos.y - 2, pos.z),
+        new THREE.Vector3(tpos.x, tpos.y, tpos.z)
+      ]),
+      materialL
+    );
+    scene.add(line);
+  }
 }
 
 function updateRaycast() {
@@ -141,11 +147,18 @@ function updateRaycast() {
   const intersects = raycaster.intersectObjects(scene.children);
 
   for (let i = 0; i < intersects.length; i++) {
-    //console.log(intersects[ i ].object);
+    //console.log(intersects[i].object);
     //document.getElementById("info").innerHTML = (intersects[ i ].object.position.x + " " + intersects[ i ].object.position.y + " " + intersects[ i ].object.position.z);
     if (mouseDown) {
-      //console.log(intersects[i].object);
       document.getElementById("pick").innerHTML = intersects[i].object.type;
+
+      if (
+        intersects[i].object.name == "astroid" &&
+        intersects[i].distance < 500
+      ) {
+        intersects[i].object.wireframe.visible = true;
+        target = intersects[i].object;
+      }
     }
   }
 }
