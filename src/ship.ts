@@ -14,6 +14,7 @@ interface xyPair {
 interface upPair {
   ent: any;
   pos: xyzPair;
+  tags: any;
 }
 
 export class ship {
@@ -75,6 +76,9 @@ export class ship {
       case 40:
         this.force.y += this.applyForce;
         break;
+      case 76:
+        this.toggleLights();
+        break;
     }
   }
 
@@ -86,9 +90,19 @@ export class ship {
     this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   }
 
-  add(ent, pos) {
+  add(ent, pos, tags?) {
     this.scene.add(ent);
-    this.updateList.push({ ent: ent, pos: pos });
+    this.updateList.push({ ent: ent, pos: pos, tags: tags });
+  }
+
+  toggleLights() {
+    for (let i = 0; i < this.updateList.length; i++) {
+      if (this.updateList[i].tags.indexOf("lights") >= 0) {
+        //toogle lights
+        let ent = this.updateList[i].ent;
+        ent.visible = ent.visible ? false : true;
+      }
+    }
   }
 
   update(d) {
@@ -98,16 +112,18 @@ export class ship {
     this.position.y += this.force.y;
     this.position.z += this.force.z;
 
+    document.getElementById("pos").innerHTML = "{" + Math.round(pos.x) + ", " + Math.round(pos.x) + ", " + Math.round(pos.z) + "}";
+
     this.camera.position.x = pos.x;
     this.camera.position.y = pos.y + 40;
     this.camera.position.z = pos.z + 55;
 
-    /*for (let i = 0; i < this.updateList.length; i++) {
+    for (let i = 0; i < this.updateList.length; i++) {
       let ent = this.updateList[i].ent;
       let upd: xyzPair = this.updateList[i].pos;
       ent.position.x = pos.x + upd.x;
       ent.position.y = pos.y + upd.y;
       ent.position.z = pos.z + upd.z;
-    }*/
+    }
   }
 }

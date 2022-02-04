@@ -10,10 +10,29 @@
         width: 100%;
         height: 100%;
       }
+
+      #pos {
+        color: white;
+        position: absolute;
+        display: block;
+        z-index: 99;
+        left: 50%;
+        top: 50%;
+      }
+      #pick {
+        color: white;
+        position: absolute;
+        display: block;
+        z-index: 99;
+        left: 53%;
+        top: 60%;
+      }
     </style>
   </head>
   <body>
     <div id="app"></div>
     <script src="src/index.ts"></script>
+    <h2 id="pos">{0, 0, 0}</h2>
+    <h2 id="pick">type</h2>
   </body>
 </html>

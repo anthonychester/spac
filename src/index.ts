@@ -1,6 +1,8 @@
 import * as THREE from "three";
 //import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { ship } from "./ship";
+import { astroid } from "./astroid";
+//import { GUI } from "dat.gui";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x101010);
@@ -10,29 +12,33 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-// To create a cube, we need a BoxGeometry. This is an object that contains all the points (vertices) and fill (faces) of the cube. We'll explore this more in the future.
-const geometry = new THREE.BoxGeometry(10, 10, 10);
 
-// In addition to the geometry, we need a material to color it.
-const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+let astroids: astroid[] = [];
 
-// A mesh is an object that takes a geometry, and applies a material to it, which we then can insert to our scene, and move freely around.
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
-const cube2 = new THREE.Mesh(
-  new THREE.BoxGeometry(3, 3, 3),
-  new THREE.MeshPhongMaterial({ color: 0x00ffff })
-);
-scene.add(cube2);
-cube2.position.y = 10;
-cube2.position.z = 10;
-
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let mouseDown = false;
+astroids.push(new astroid(scene, 80, 0, 80));
 //create a blue LineBasicMaterial
 const materialL = new THREE.LineBasicMaterial({
   color: 0x0000ff,
   linewidth: 50,
   linecap: "round"
+});
+
+window.addEventListener("mousedown", () => {
+  mouseDown = true;
+});
+
+window.addEventListener("mouseup", () => {
+  mouseDown = false;
+});
+window.addEventListener("mousemove", (event) => {
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 });
 
 const points = [];
@@ -42,33 +48,38 @@ let line = new THREE.Line(geometryL, materialL);
 scene.add(line);
 
 let player = new ship(scene, camera);
-
+player.position.z = 200;
 camera.position.set(0, 25, 20);
 camera.rotation.x = -0.46;
 
-const light = new THREE.PointLight(0xffffff, 5);
+const light = new THREE.PointLight(0xffffff, 1);
 light.decay = 0.5;
 light.distance = 40;
 light.position.set(0, -25, 24);
 
-let pa = { x: 0, y: 30, z: 0 };
+let pa = { x: 0, y: 15, z: 30 };
 console.log(light.position);
-player.add(light, pa);
+player.add(light, pa, ["lights"]);
 const s = new THREE.Mesh(
   new THREE.SphereGeometry(1.3, 32, 16),
   new THREE.MeshBasicMaterial({ color: 0xffff00 })
 );
 s.position.set(0, -25, 24);
-player.add(s, pa);
+player.add(s, pa, ["lights"]);
 
-const geome = new THREE.SphereGeometry(5, 32, 16);
+const geome = new THREE.SphereGeometry(50, 32, 16);
 const mater = new THREE.MeshBasicMaterial({ color: 0xffff00 });
 const sphere = new THREE.Mesh(geome, mater);
-sphere.position.x = 150;
 scene.add(sphere);
-const light2 = new THREE.PointLight(0xffffff, 10);
+const light2 = new THREE.PointLight(0xffffff, 1);
+light2.decay = 0.3;
+light2.distance = 1200;
 light.position.set(0, 0, 0);
 sphere.add(light2);
+
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
+//-----------------------------------------------------------------
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -78,12 +89,25 @@ document.body.appendChild(renderer.domElement);
 //controls.update() must be called after any manual changes to the camera's transform
 //controls.update();
 
+/*
+const gui = new GUI();
+const cubeFolder = gui.addFolder("Cube");
+//cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+//cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
+//cubeFolder.add(cube.rotation, 'z', 0, Math.PI * 2)
+cubeFolder.open();
+const cameraFolder = gui.addFolder("Camera");
+cameraFolder.add(camera.position, "z", 0, 10);
+cameraFolder.open();
+*/
+
 function animate() {
   //cube.rotation.x += 0.01;
   //cube.rotation.y += 0.01;
   //cone.rotation.x += 0.01;
   player.update(null);
   renderLine();
+  updateRaycast();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
@@ -108,4 +132,20 @@ function renderLine() {
     materialL
   );
   scene.add(line);
+}
+
+function updateRaycast() {
+  raycaster.setFromCamera(mouse, camera);
+
+  // calculate objects intersecting the picking ray
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  for (let i = 0; i < intersects.length; i++) {
+    //console.log(intersects[ i ].object);
+    //document.getElementById("info").innerHTML = (intersects[ i ].object.position.x + " " + intersects[ i ].object.position.y + " " + intersects[ i ].object.position.z);
+    if (mouseDown) {
+      //console.log(intersects[i].object);
+      document.getElementById("pick").innerHTML = intersects[i].object.type;
+    }
+  }
 }
